@@ -58,9 +58,9 @@ Here is a list of variables that can be found in the dataset:
 
 21. **gamble_played_1**: Takes the value 1 if the gamble played was "F".
 
-22. **gamble_played_2**: Taakes the value 1 if the gamble played was "G".
+22. **gamble_played_2**: Takes the value 1 if the gamble played was "G".
 
-23. **gamble_played_3**: This variable takes the value 1 if the gamble played was "GS"
+23. **gamble_played_3**: Takes the value 1 if the gamble played was "GS"
 
 24. **G_and_training**:  Gamble G in any condition after training.
 
@@ -68,7 +68,7 @@ Here is a list of variables that can be found in the dataset:
 
 26. **odd**: Equal to 1 when there is an odd number of clicks on the toggle button.
 
-27. **toggle_count2**: Number of clicks to the square.
+27. **toggle_count2**: Number of clicks squared.
 
 28. **toggle_count_upto10**: Number of clicks capped to 10 clicks.
 
