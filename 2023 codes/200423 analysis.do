@@ -9,11 +9,10 @@
 // USE THESE ROUTES TO WORK WITH THE DATA
 //____________________________________________________________________________________________________
 //
-global location_data "G:\My Drive\SD\310517 experiment 2\2023 data" 
-global location_cleaned_data "G:\My Drive\SD\310517 experiment 2\2023 cleaned" 
-global location_output "G:\My Drive\SD\310517 experiment 2\2023 output" 
-global location_code "G:\My Drive\SD\310517 experiment 2\2023 codes" 
-
+global location_data "C:\Users\edika\Desktop\GITHUB\Dominance training\Coalescing-Training\2023 data"
+global location_cleaned_data "C:\Users\edika\Desktop\GITHUB\Dominance training\Coalescing-Training\2023 cleaned" 
+global location_output "C:\Users\edika\Desktop\GITHUB\Dominance training\Coalescing-Training\2023 output" 
+global location_code "C:\Users\edika\Desktop\GITHUB\Dominance training\Coalescing-Training\2023 codes" 
 //___________________________________________________________________________________________________
 
 
@@ -21,6 +20,55 @@ global location_code "G:\My Drive\SD\310517 experiment 2\2023 codes"
 cd "$location_cleaned_data"
 
 use "Data_experiment_cleaned_IP_masked", clear
+
+
+// violation of SD
+
+gen violation_SD=1 if ///
+response=="gamble0" & ///
+(coalesced_gamble=="G_minus.jpeg" | ///
+ coalesced_gamble=="F_minus.jpeg" | ///
+ coalesced_gamble=="FS_minus.jpeg" | ///
+ coalesced_gamble=="GS_minus.jpeg")
+
+ 
+ 
+  replace violation_SD=1 if ///
+response=="gamble1" & ///
+(coalesced_gamble1=="G_minus.jpeg" | ///
+ coalesced_gamble1=="F_minus.jpeg" | ///
+ coalesced_gamble1=="FS_minus.jpeg" | ///
+ coalesced_gamble1=="GS_minus.jpeg")
+ 
+ 
+replace violation=0 if missing(vio)
+
+tab coalesced_gamble response if violation==0
+
+tab coalesced_gamble response if violation==1
+
+// violation of SD in trial 1
+gen violation_SD_trial1=1 if order==1 & viola==1 
+bysort sub (order): egen violation_SD_trial1_=sum(violation_SD_trial1)
+drop violation_SD_trial1
+rename violation_SD_trial1 violation_SD_trial1
+
+
+
+// violation of SD in training
+
+gen violation_SD_training=1 if order==2 & violation_SD==1 
+bysort sub (order): egen violation_SD_training_=sum(violation_SD_training)
+drop violation_SD_training
+rename violation_SD_training violation_SD_training
+
+
+
+bysort condition order: sum violation_SD
+
+// We focus on studing violations of SD during trials 1 and 3 (trial 2 corresponded to the training)
+
+drop if order==2
 
 // The following lines of code create variables with labels that are easy to interpret!
 
@@ -45,9 +93,9 @@ replace gamble_played_condition="(Coalesced - Different) F+ vs F-" if gamble_pla
 replace gamble_played_condition="(Coalesced - Different) G+ vs G-" if gamble_played_condition=="(B) G+ vs G-"
 replace gamble_played_condition="(Transparent) GS+ vs GS-" if gamble_played_condition=="(C) GS+ vs GS-"
 
-bysort any gamble_played_condition: sum violat 
+bysort any gamble_played_condition: sum violation_SD 
 
-display 435+436+438 //= 1309 obs before training (F gambles + G gambles + GS transparent gambles)
+display 435+436+438 //= 1309 obs before training 
 
 // counting obs
 /*
@@ -67,19 +115,19 @@ display 435+436+438 //= 1309 obs before training (F gambles + G gambles + GS tra
 
 // The variable gamble_cond_n is identical to gamble_played_condition, but the former is a numerical variable, while the latter is a string variable
 
-bysort gamble_cond_n: sum violat if any==0
+bysort gamble_cond_n: sum violation_SD if any==0
 
-gen satis=1-viola
+gen satis=1-violation_SD
 
 tab gamble_cond_n any if any==0, nolabel
 tab gamble_cond_n
 
-capture drop new_condition_choice
-gen new_condition_choice="C, GS+ vs GS-, no training" if any==0 & gamble_cond_n==1
-replace new_condition_choice="B, F+ vs F-, before training" if any==0 & gamble_cond_n==2
-replace new_condition_choice="B, G+ vs G-, after training" if any==1 & gamble_cond_n==3
-replace new_condition_choice="A, G+ vs G-, before training" if any==0 & gamble_cond_n==4
-replace new_condition_choice="A, G+ vs G-, after training" if any==1 & gamble_cond_n==4
+capture drop new_condition_detailed
+gen new_condition_detailed="C, GS+ vs GS-, no training" if any==0 & gamble_cond_n==1
+replace new_condition_detailed="B, F+ vs F-, before training" if any==0 & gamble_cond_n==2
+replace new_condition_detailed="B, G+ vs G-, after training" if any==1 & gamble_cond_n==3
+replace new_condition_detailed="A, G+ vs G-, before training" if any==0 & gamble_cond_n==4
+replace new_condition_detailed="A, G+ vs G-, after training" if any==1 & gamble_cond_n==4
 
 tab gamble_con new_condition, missing
 tab  new_condition gamble_con, missing
@@ -88,7 +136,7 @@ tab  new_condition gamble_con, missing
 proportion satis if any==0, over(gamble_cond_n, nolabel) 
 proportion satis if any==1, over(gamble_cond_n, nolabel) 
 
-encode new_condition_choice, gen(n_condition)
+encode new_condition_detailed, gen(n_condition)
 label list
 tab n_condition
 tab n_condition, nolabel
@@ -108,8 +156,10 @@ estimates store result_after
 //PLOT: Proportion of Violations of Stochastic Dominance (before deleting outliers)
 //_________________________________________________________
 
+cd "$location_output"
+
 coefplot result_before result_after, xtitle(Proportion of Violations of Stochastic Dominance) ///
-xlabel(0 (.1) .5)  grid(none) ///
+xlabel(0 (.1) .8)  grid(none) ///
       p1(label(First choice, without training) pstyle(p13))       ///
     p2(label(Second choice, after training) pstyle(p14) ) ///
 	scheme(plotplainblind) ///
@@ -124,6 +174,7 @@ xlabel(0 (.1) .5)  grid(none) ///
            2= "{bf:Coalesced - Identical Choices}" ) ///
 		   legend( position(6) col(2))
 
+graph export "Figure_Violations_SD_before_dropping_outliers.png", replace
 
 
 // We create "delete" equal to 1 for duplicated IDs as well as for outliers in reaction times
@@ -152,8 +203,9 @@ drop deletes
 
 
 // counting subjects
-bysort gamble_played_condition:sum sub_no //
-display 344 + 343 + 385 //subjects before training (F gambles + G gambles + GS transparent gambles)
+bysort any gamble_played_condition: sum violation_SD 
+
+display 344 + 343 + 385 //subjects before training 
 codebook sub_no //1072 unique values
 
 
@@ -181,7 +233,7 @@ estimates store result_after
 cd "$location_output"
 
 coefplot result_before result_after, xtitle(Proportion of Violations of Stochastic Dominance) ///
-xlabel(0 (.1) .5)  grid(none) ///
+xlabel(0 (.1) .8)  grid(none) ///
       p1(label(First choice, without training) pstyle(p13))       ///
     p2(label(Second choice, after training) pstyle(p14) ) ///
 	scheme(plotplainblind) ///
@@ -196,7 +248,7 @@ xlabel(0 (.1) .5)  grid(none) ///
            2= "{bf:Coalesced - Identical Choices}" ) ///
 		   legend( position(6) col(2)) 
 		   
-graph export "Figure_Violations_SD.png"
+graph export "Figure_Violations_SD.png", replace
 
 
 //_________________________________________________________
@@ -205,31 +257,31 @@ graph export "Figure_Violations_SD.png"
 // violations of SD before training - comparisons against the control condition (i.e., transparent gambles GS)
 //_________________________________________________________
 
- tabulate violat condition
+ tabulate violation_SD condition
  tab gamble_played_condition any
  tab gamble_played_d condition if any==0, missing 
  tab gamble_played_d condition if any==1, missing
 
  tabulate gamble_played_d condition if any==0 & condition!="B", missing 
- tabulate violat condition if any==0 & condition!="B", chi2 
+ tabulate violation_SD condition if any==0 & condition!="B", chi2 
  
- // Pearson chi2(1) =  60.8133   Pr = 0.000
-  prtest violat if any==0 & condition!="B", by(condition)
+ // Pearson chi2(1) = 186.7571   Pr = 0.000
+  prtest violation_SD if any==0 & condition!="B", by(condition)
 
  // Chi-squared test for independence of rows and columns
  // Testing if proportions from two conditions are the same
- //		The proportion of participants in A who violated was 0.33 whereas the proportion from the control group C was only 0.09. 
- //		The difference in proportions is significant, χ²(1, N = 728) = 60.8133, p < 0.001.
+ //		The proportion of participants in A who violated was 0.68 whereas the proportion from the control group C was only 0.18. 
+ //		The difference in proportions is significant, χ²(1, N = 728) = 186.7571, p < 0.001.
  
  
  
-  tabulate violat condition if any==0 & condition!="A", chi2 //<<<<<<<<<<<<<<
+  tabulate violation_SD condition if any==0 & condition!="A", chi2 
  
- // Pearson chi2(1) =  87.6531   Pr = 0.000
+ //  Pearson chi2(1) = 206.1521   Pr = 0.000
  
- prtest violat if any==0 & condition!="A", by(condition)
- //		The proportion of participants in B who violated was 0.39 whereas the proportion from the control group C was only 0.09. 
- //		The difference in proportions is significant, χ²(1, N = 729) = 87.6531, p < 0.001.
+ prtest violation_SD if any==0 & condition!="A", by(condition)
+ //		The proportion of participants in B who violated was 0.71 whereas the proportion from the control group C was only 0.18. 
+ //		The difference in proportions is significant, χ²(1, N = 729) = 206.1521 , p < 0.001.
 
  
 //_________________________________________________________
@@ -245,12 +297,12 @@ graph export "Figure_Violations_SD.png"
  hist toggle_count if !missing(training_version) & toggle_count>0 & toggle_count<=19 , discrete ///
  xlabel(6 (1) 19) scheme(plotplainblind) xtitle("Practice (number of clicks)")
 
- graph export "Figure_toggle_count_during_training.png"
+ graph export "Figure_toggle_count_during_training.png", replace
 
 // toggle counts per condition and rate of violations per toggle counts 
 tab toggle_count_u
 tab toggle_count_u n_cond, missing
-bysort toggle_count_u:  sum violat 
+bysort toggle_count_u:  sum violation_SD 
 
 
 //_________________________________________________________
@@ -266,17 +318,17 @@ bysort toggle_count_u:  sum violat
 //_________________________________________________________
 
  
- global DV violat
+ global DV violation_SD
 
 
 tab gamble_played_d condition, nolabel
 tab gamble_played_d condition
 
-replace new_condition_choice="1: B, F+ vs F-, before training" if new_co=="B, F+ vs F-, before training"
-replace new_condition_choice="2: A, G+ vs G-, before training" if new_co=="A, G+ vs G-, before training"
-replace new_condition_choice="3: A, G+ vs G-, after training" if new_co=="A, G+ vs G-, after training"
-replace new_condition_choice="4: B, G+ vs G-, after training" if new_co=="B, G+ vs G-, after training"
-replace new_condition_choice="5: C, GS+ vs GS-, no training" if new_co=="C, GS+ vs GS-, no training"
+replace new_condition_detailed="1: B, F+ vs F-, before training" if new_co=="B, F+ vs F-, before training"
+replace new_condition_detailed="2: A, G+ vs G-, before training" if new_co=="A, G+ vs G-, before training"
+replace new_condition_detailed="3: A, G+ vs G-, after training" if new_co=="A, G+ vs G-, after training"
+replace new_condition_detailed="4: B, G+ vs G-, after training" if new_co=="B, G+ vs G-, after training"
+replace new_condition_detailed="5: C, GS+ vs GS-, no training" if new_co=="C, GS+ vs GS-, no training"
 
 drop n_cond
 encode new_condition, gen(n_cond)
@@ -287,7 +339,7 @@ tab n_cond, missing
 
 cd "$location_output"
 
- 
+
  xtlogit $DV ///
 ib2.n_cond ///
 if condition!="C" ///
@@ -318,6 +370,36 @@ addstat ("ICC",e(rho)) ///
  label
 
  
+ 
+//Linear models to ease the interpretation of arginal effects
+
+ reg $DV ///
+ib2.n_cond ///
+if condition!="C" ///
+, cluster(sub_no)
+outreg2 using SDlm.doc, replace ctitle(LM)   ///
+ label
+
+ 
+
+reg $DV ///
+i.any ///
+if condition!="C" ///
+,  cluster(sub_no)
+estimates store re
+outreg2 using SDlm.doc, append ctitle(LM)   ///
+ label
+
+ 
+
+ reg $DV ///
+ib0.toggle_count_u ///
+if condition!="C" ///
+, cluster(sub_no)
+outreg2 using SDlm.doc, append ctitle(LM)  ///
+ label
+ 
+ 
 //_________________________________________________________
 //
 // Histogram of reaction times 
@@ -326,14 +408,14 @@ addstat ("ICC",e(rho)) ///
 //_________________________________________________________
 //
 hist RT, scheme(plotplainblind)
-tab viola
+tab violation_SD
 
- bysort gamble_played_condition any viola: sum RT , detail // max 40 ..19 is 99%
+ bysort gamble_played_condition any violation_SD: sum RT , detail 
  
   hist RT , by( gamble_played_condition any , col(1	) note("") )  ///
   scheme(plotplainblind)
   
-    graph export "Histogram_RT_across_conditions.png"
+    graph export "Histogram_RT_across_conditions.png", replace
 
   
 
@@ -348,7 +430,7 @@ tab viola
 title("") ///
  scheme(plotplainblind) name(z12, replace) 
  
-  graph export "Histogram_RT_by_violation_or_satisfaction_SD.png"
+  graph export "Histogram_RT_by_violation_or_satisfaction_SD.png", replace
 
  
   

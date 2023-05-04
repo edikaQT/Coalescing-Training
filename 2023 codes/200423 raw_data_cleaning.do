@@ -4,11 +4,11 @@
 //____________________________________________________________________________________________________
 
 //
-global location_data "G:\My Drive\SD\310517 experiment 2\2023 data" 
-global location_data "G:\My Drive\SD\310517 experiment 2\2023 data" 
-global location_cleaned_data "G:\My Drive\SD\310517 experiment 2\2023 cleaned" 
-global location_output "G:\My Drive\SD\310517 experiment 2\2023 output" 
-global location_code "G:\My Drive\SD\310517 experiment 2\2023 codes" 
+global location_data "C:\Users\edika\Desktop\GITHUB\Dominance training\Coalescing-Training\2023 data"
+global location_cleaned_data "C:\Users\edika\Desktop\GITHUB\Dominance training\Coalescing-Training\2023 cleaned" 
+global location_output "C:\Users\edika\Desktop\GITHUB\Dominance training\Coalescing-Training\2023 output" 
+global location_code "C:\Users\edika\Desktop\GITHUB\Dominance training\Coalescing-Training\2023 codes" 
+
 
 //___________________________________________________________________________________________________
 
@@ -125,11 +125,19 @@ rename v20 togge_count
 destring togge, replace
 destring order_of, replace
 
-rename v6 top_gamble
-rename v8 bottom_gamble
+// There are two gambles in the training that participants need to choose: Gamble 0 and Gamble 1.
 
-rename v10 top_gamble1
-rename v12 bottom_gamble1
+// "coalesced_gamble" and "bottom gamble" variables refer to the first gamble (Gamble 0). The first variable is in coalesced form, while the second variable is in split form. 
+
+// "coalesced_gamble1" and "bottom gamble1" refer to the second gamble (Gamble 1). The first variable is in coalesced form, while the second variable is in split form. 
+
+
+
+rename v6 coalesced_gamble
+rename v8 split_gamble
+
+rename v10 coalesced_gamble1
+rename v12 split_gamble1
 
 
 drop v5 v7
@@ -145,28 +153,28 @@ rename v14 training
 drop v13
 destring training, replace
 
-replace bottom_gamble="" if bottom_gamble=="null.jpeg"
-replace bottom_gamble1="" if bottom_gamble1=="null.jpeg"
+replace split_gamble="" if split_gamble=="null.jpeg"
+replace split_gamble1="" if split_gamble1=="null.jpeg"
 
-list top_gamble	bottom_gamble	top_gamble1	bottom_gamble1 if ///
+list coalesced_gamble	split_gamble	coalesced_gamble1	split_gamble1 if ///
 training==1
 
-tab top_gamble	bottom_gamble	 if ///
+tab coalesced_gamble	split_gamble	 if ///
 training==1
 
 *training gamble
-gen training_gamble=top_gamble if training==1
-replace training_gamble="F_minus vs F_plus" if top_gamble=="F_minus.jpeg"
-replace training_gamble="F_plus vs F_minus" if top_gamble=="F_plus.jpeg"
-replace training_gamble="G_minus vs G_plus" if top_gamble=="G_minus.jpeg"
-replace training_gamble="G_plus vs G_minus" if top_gamble=="G_plus.jpeg"
+gen training_gamble=coalesced_gamble if training==1
+replace training_gamble="F_minus vs F_plus" if coalesced_gamble=="F_minus.jpeg"
+replace training_gamble="F_plus vs F_minus" if coalesced_gamble=="F_plus.jpeg"
+replace training_gamble="G_minus vs G_plus" if coalesced_gamble=="G_minus.jpeg"
+replace training_gamble="G_plus vs G_minus" if coalesced_gamble=="G_plus.jpeg"
 
 tab training*
-tab bottom_gamble1 training, missing
+tab split_gamble1 training, missing
 
-replace training_gamble="" if missing(bottom_gamble)
+replace training_gamble="" if missing(split_gamble)
 
-drop bottom_g*
+drop split_g*
 drop training
 encode training, gen(training_g)
 
@@ -179,7 +187,7 @@ decode training_fo, gen(training_received)
 drop training_foll
 
 bysort sub (order): gen toggle_count=sum(togge_count)
-drop if !missing(training_g)
+//drop if !missing(training_g)
 drop training_g
 
 gen training_version="G" if training_received=="G_plus vs G_minus" | ///
@@ -199,27 +207,19 @@ replace any_training=1 if !missing(training_v)
 
 tab toggle_c any
 
-*violation of SD
 
-gen violation_SD=1 if ///
-response=="gamble0" & ///
-(top_gamble=="G_minus.jpeg" | ///
- top_gamble=="F_minus.jpeg" | ///
- top_gamble=="FS_minus.jpeg" | ///
- top_gamble=="GS_minus.jpeg")
 
-replace violation=0 if missing(vio)
 gen gamble_played="G" if ///
-top_gamble=="G_minus.jpeg" | top_gamble=="G_plus.jpeg"
+coalesced_gamble=="G_minus.jpeg" | coalesced_gamble=="G_plus.jpeg"
 
 replace gamble_played="F" if ///
-top_gamble=="F_minus.jpeg" | top_gamble=="F_plus.jpeg"
+coalesced_gamble=="F_minus.jpeg" | coalesced_gamble=="F_plus.jpeg"
 
 replace gamble_played="GS" if ///
-top_gamble=="GS_minus.jpeg" | top_gamble=="GS_plus.jpeg"
+coalesced_gamble=="GS_minus.jpeg" | coalesced_gamble=="GS_plus.jpeg"
 
 replace gamble_played="FS" if ///
-top_gamble=="FS_minus.jpeg" | top_gamble=="FS_plus.jpeg"
+coalesced_gamble=="FS_minus.jpeg" | coalesced_gamble=="FS_plus.jpeg"
 
 tab gamble_played, missing
 
