@@ -12,7 +12,7 @@ Here is a list of variables that can be found in the dataset:
 
 5. **violation_SD**: Takes the value 1 if the participant selected the dominated gamble, i.e., if they selected "G_minus.jpeg" | "F_minus.jpeg" | "FS_minus.jpeg" | "GS_minus.jpeg".
 
-6. **RT**: Pparticipant's reaction time.
+6. **RT**: Participant's reaction time.
 
 7. **sub_no**: Participant ID.
 
