@@ -21,4 +21,6 @@ A video of the experimental task can be found at https://github.com/neil-stewart
 
 "200423 raw_data_cleaning.do" cleans the raw data.
 
-"200423 analysis.do" reproduce all regressions, figues and tables presented in the paper.
+"200423 analysis.do" reproduce all regressions, figues and tables presented in the paper (an R version of the code can be found in "200423 analysis.R").
+
+See the codebook of variables at https://github.com/edikaQT/Coalescing-Training/blob/main/2023%20cleaned/Codebook.md
