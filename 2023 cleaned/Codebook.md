@@ -2,7 +2,7 @@
 
 Here is a list of variables that can be found in the dataset:
 
-1. **order_of_trial**: Indicates the order of the trial, which can be either 1 (without any training) or 3 (for participants who have passed the training).
+1. **order_of_trial**: Indicates the order of the trial, which can be either 1 (without any training), 2 (during training), or 3 (for participants who have passed the training).
 
 2. **coalesced_gamble**: Contains the first gamble presented to the participant in coalesced form.
 
