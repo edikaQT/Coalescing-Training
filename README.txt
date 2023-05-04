@@ -24,6 +24,6 @@ To assist with the replication process, Appendix B displays the Visual Stimuli P
 
 The "2023 data" folder contains the raw data, while the "2023 cleaned" folder contains the cleaned data. 
 
-The "2023 codes" folder contains the code used to clean the data and replicate all analyses in the paper. Specifically, "200423 raw_data_cleaning.do" cleans the raw data, while "200423 analysis.do" reproduces all regressions, figures, and tables presented in the paper. 
+The "2023 codes" folder contains the code used to clean the data and replicate all analyses in the paper. Specifically, "200423 raw_data_cleaning.do" cleans the raw data, while "200423 analysis.do" reproduces all regressions, figures, and tables presented in the paper (an R version of the code can be found in "200423 analysis.R")
 
 The "2023 output" folder contains the figures produced by the "200423 analysis.do" code.
