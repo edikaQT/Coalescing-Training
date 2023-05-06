@@ -68,6 +68,9 @@ dat[violation_SD==1,.N, by=.(coalesced_gamble, coalesced_gamble1 ,response)]
 
 
 
+
+
+
 # Creating records of violations of SD (at the participant level)
 # violation of SD in trial 1
 # (indicates whether the participant violated the SD in Trial 1)
@@ -82,8 +85,22 @@ dat[ order_of_trial==2 & violation_SD==1 , violation_SD_training:=1]
 dat[ , violation_SD_training:=sum(violation_SD_training, na.rm=T), by=.(sub_no)]
 dat[condition=="C" , violation_SD_training:=NA]
 
+#***************************
+# Tabulations across trials requested by JB
+# violation of SD in trial 3
+# (indicates whether the participant violated the SD in Trial 2)
 
-dat[,.(order_of_trial, sub_no,violation_SD, violation_SD_trial1, violation_SD_training)][1:20]
+dat[ order_of_trial==3 & violation_SD==1 , violation_SD_trial3:=1]
+dat[ , violation_SD_trial3:=sum(violation_SD_trial3, na.rm=T), by=.(sub_no)]
+dat[condition=="C" , violation_SD_trial3:=NA]
+
+# Tabulating violations across trials
+dat[order_of_trial==1,.N, by=.(violation_SD_trial1, violation_SD_training, violation_SD_trial3, condition)][order(condition)]
+
+#***************************
+
+
+dat[,.(order_of_trial, sub_no,violation_SD, violation_SD_trial1, violation_SD_training, violation_SD_trial3)][1:20]
 
 
 # We focus on studying violations of SD during trials 1 and 3 (trial 2 is part of the training)
